@@ -1,6 +1,8 @@
 defmodule Melody.Cache do
   use GenServer
 
+  alias Melody.NodeList
+
   @default_init_args [
     limit: 50,
     last_used_expiration: {-2, :hour},
@@ -13,11 +15,27 @@ defmodule Melody.Cache do
   end
 
   def set(key, value) do
-    GenServer.call(__MODULE__, {:set, key, value})
+    node = node_for_key(key)
+
+    cond do
+      Node.self() == node ->
+        GenServer.call(__MODULE__, {:set, key, value})
+
+      true ->
+        :rpc.call(node, __MODULE__, :set, [key, value])
+    end
   end
 
   def get(key) do
-    GenServer.call(__MODULE__, {:get, key})
+    node = node_for_key(key)
+
+    cond do
+      Node.self() == node ->
+        GenServer.call(__MODULE__, {:get, key})
+
+      true ->
+        :rpc.call(node, __MODULE__, :get, [key])
+    end
   end
 
   defp ensure_elements_table_exist() do
@@ -46,8 +64,6 @@ defmodule Melody.Cache do
 
   @impl GenServer
   def handle_info(:remove_old_entries, state) do
-    IO.inspect("checking old entries")
-
     expiration_time = expiration_time_in_μs(state[:last_used_expiration])
 
     expired_entries =
@@ -111,5 +127,14 @@ defmodule Melody.Cache do
 
   defp current_time_in_μs() do
     DateTime.utc_now() |> DateTime.to_unix(:microsecond)
+  end
+
+  defp node_for_key(key) do
+    key
+    |> then(fn k -> :crypto.hash(:md5, k) end)
+    |> :erlang.binary_to_list()
+    |> Enum.sum()
+    |> then(&(rem(&1, NodeList.num_partitions()) + 1))
+    |> NodeList.node_on_partition()
   end
 end
