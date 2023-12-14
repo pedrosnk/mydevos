@@ -1,18 +1,11 @@
 defmodule Melody do
-  @moduledoc """
-  Documentation for `Melody`.
-  """
+  alias Melody.Cache
 
-  @doc """
-  Hello world.
+  def get(key) do
+    Cache.get(key)
+  end
 
-  ## Examples
-
-      iex> Melody.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def set(key, value) do
+    Cache.set(key, value)
   end
 end
