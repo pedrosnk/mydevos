@@ -31,17 +31,26 @@ type OverlapSuite struct{}
 
 var _ = Suite(&OverlapSuite{})
 
-func (s *OverlapSuite) TestOverlap(c *C) {
+func (s *OverlapSuite) TestOverlapCoords(c *C) {
 	for _, t := range testTable {
 		c.Assert(OverlappedCoords(t.x1, t.x2, t.x3, t.x4), Equals, t.expected)
 	}
 }
 
-//func (s *OverlapSuite) TestCallingOverlaps(c *C) {
-//  for _, t := range testTable {
-//    l1 := Line{x1: t.x1, x2: t.x2}
-//    l2 := Line{x1: t.x3, x2: t.x4}
-//
-//    c.Assert(l1.OverlapsWith(l2), Equals, t.expected)
-//  }
-//}
+func (s *OverlapSuite) TestOverlapLines(c *C) {
+	for _, t := range testTable {
+		l1 := Line{X1: t.x1, X2: t.x2}
+		l2 := Line{X1: t.x3, X2: t.x4}
+
+		c.Assert(OverlappedLines(l1, l2), Equals, t.expected)
+	}
+}
+
+func (s *OverlapSuite) TestCallingOverlaps(c *C) {
+	for _, t := range testTable {
+		l1 := Line{X1: t.x1, X2: t.x2}
+		l2 := Line{X1: t.x3, X2: t.x4}
+
+		c.Assert(l1.OverlapsWith(l2), Equals, t.expected)
+	}
+}

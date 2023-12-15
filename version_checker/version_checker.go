@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-// User semver to parse, and compare software version
-
 type Version struct {
 	major, minor, patch int64
 	pre                 string
@@ -23,6 +21,8 @@ const (
 	Invalid Comparation = 2
 )
 
+// Giving two string follwing the smver spec (https://semver.org) this
+// this function comapares them both and returns if result of this comparation.
 func Compare(str1, str2 string) (Comparation, error) {
 	v1, err := Parse(str1)
 	if err != nil {
@@ -57,6 +57,7 @@ func Compare(str1, str2 string) (Comparation, error) {
 	}
 }
 
+// This function parses the stirng following the semver spec (https://semver.org)
 func Parse(str string) (*Version, error) {
 	version := &Version{}
 	versions := strings.SplitN(str, "-", 2)
